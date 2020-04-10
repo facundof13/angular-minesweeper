@@ -1,0 +1,48 @@
+.cell {
+  padding: 10px;
+  border: 1px black solid;
+  width: 10px;
+  height: 10px;
+  background-color: darkgrey;
+  text-shadow: 1px 1px black;
+}
+
+.pink {
+  color: red;
+}
+.grey {
+  color: grey;
+}
+.blue {
+  color: blue;
+}
+.green {
+  color: green;
+}
+.red {
+  color: red;
+}
+.darkBlue {
+  color: darkblue;
+}
+.purple {
+  color: purple;
+}
+.teal {
+  color: teal;
+}
+.black {
+  color: black;
+}
+
+.flag {
+  color: red;
+}
+
+.hide {
+  background-color: lightgrey;
+}
+
+.flipped {
+  background-color: lightgrey;
+}
