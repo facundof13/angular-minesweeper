@@ -1,9 +1,14 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Output, EventEmitter } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class GameService {
+  @Output() gameStatus = new EventEmitter<any>();
+  private _getBoardSource = new BehaviorSubject<any>(null);
+  getBoard$ = this._getBoardSource.asObservable();
+
   board: Array<
     Array<{
       x: number;
@@ -13,34 +18,27 @@ export class GameService {
       flagged: boolean;
     }>
   > = [];
-  length: number = 20;
-  width: number = 20;
-  bombs: number = 20;
+  length = 20;
+  width = 20;
+  bombs = 60;
   cellsToFlip: Array<Array<number>> = [[null, null]];
-  gameOver: boolean = false;
-  resetting: boolean = false;
+  gameOver = false;
 
   constructor() {
     this.setupBoard();
   }
 
   resetGame() {
-    this.resetting = true;
     this.setupBoard();
-    return [this.length, this.width];
-  }
-
-  getReset() {
-    return this.resetting;
   }
 
   setupBoard() {
+    this.board = [];
     this.gameOver = false;
-    this.resetting = false;
     let bombsLeft = this.bombs;
 
     for (let i = 0; i < this.length; i++) {
-      let rowArr = [];
+      const rowArr = [];
       for (let j = 0; j < this.width; j++) {
         rowArr.push({ x: i, y: j, visited: false, val: 0, flagged: false });
       }
@@ -48,33 +46,33 @@ export class GameService {
     }
 
     while (bombsLeft > 0) {
-      let ranX = this.getRandomInt(0, this.length);
-      let ranY = this.getRandomInt(0, this.width);
+      const ranX = this.getRandomInt(0, this.length);
+      const ranY = this.getRandomInt(0, this.width);
       this.board[ranX][ranY].val = -1;
       bombsLeft--;
     }
 
     for (let x = 0; x < this.length; x++) {
       for (let y = 0; y < this.width; y++) {
-        let currentPiece = this.board[x][y];
-        if (currentPiece.val == -1) {
-          //cell on top of the bomb
+        const currentPiece = this.board[x][y];
+        if (currentPiece.val === -1) {
+          // cell on top of the bomb
           if (x - 1 >= 0 && this.board[x - 1][y].val !== -1) {
             this.board[x - 1][y].val += 1;
           }
-          //cell below the bomb
+          // cell below the bomb
           if (x + 1 < this.length && this.board[x + 1][y].val !== -1) {
             this.board[x + 1][y].val += 1;
           }
-          //cell to the right of the bomb
+          // cell to the right of the bomb
           if (y + 1 < this.width && this.board[x][y + 1].val !== -1) {
             this.board[x][y + 1].val += 1;
           }
-          //cell to the left of the bomb
+          // cell to the left of the bomb
           if (y - 1 >= 0 && this.board[x][y - 1].val !== -1) {
             this.board[x][y - 1].val += 1;
           }
-          //cell up and to the right
+          // cell up and to the right
           if (
             x - 1 >= 0 &&
             y + 1 < this.width &&
@@ -82,7 +80,7 @@ export class GameService {
           ) {
             this.board[x - 1][y + 1].val += 1;
           }
-          //cell down and to the right
+          // cell down and to the right
           if (
             x + 1 < this.length &&
             y + 1 < this.width &&
@@ -90,11 +88,11 @@ export class GameService {
           ) {
             this.board[x + 1][y + 1].val += 1;
           }
-          //cell up and to the left
+          // cell up and to the left
           if (x - 1 >= 0 && y - 1 >= 0 && this.board[x - 1][y - 1].val !== -1) {
             this.board[x - 1][y - 1].val += 1;
           }
-          //cell down and to the left
+          // cell down and to the left
           if (
             x + 1 < this.length &&
             y - 1 >= 0 &&
@@ -105,6 +103,15 @@ export class GameService {
         }
       }
     }
+
+    this._getBoardSource.next(this.board);
+  }
+
+  changeBoardSize(obj) {
+    this.length = obj.length;
+    this.width = obj.width;
+    this.bombs = obj.mines;
+    this.setupBoard();
   }
 
   getLength() {
@@ -119,45 +126,45 @@ export class GameService {
     return this.board[x][y];
   }
 
-  clickedCell(x: number, y: number) {
+  clickedCell(cell) {
     if (!this.gameOver) {
-      if (this.getCell(x, y).val == 0) {
-        let stack = [];
-        stack.push([x, y]);
+      if (cell.val === 0) {
+        const stack = [];
+        stack.push([cell.x, cell.y]);
 
         while (stack.length > 0) {
-          let cx = stack[0][0];
-          let cy = stack[0][1];
+          const cx = stack[0][0];
+          const cy = stack[0][1];
           this.flipCell(cx, cy);
 
-          if (this.getCell(cx, cy).val == 0) {
+          if (this.getCell(cx, cy).val === 0) {
             if (
               cy - 1 >= 0 &&
-              this.getCell(cx, cy - 1).val == 0 &&
+              this.getCell(cx, cy - 1).val === 0 &&
               !this.isFlipped(cx, cy - 1)
             ) {
-              //left
+              // left
               stack.unshift([cx, cy - 1]);
             } else if (
               cx + 1 < this.length &&
-              this.getCell(cx + 1, cy).val == 0 &&
+              this.getCell(cx + 1, cy).val === 0 &&
               !this.isFlipped(cx + 1, cy)
             ) {
               // down
               stack.unshift([cx + 1, cy]);
             } else if (
               cy + 1 < this.width &&
-              this.getCell(cx, cy + 1).val == 0 &&
+              this.getCell(cx, cy + 1).val === 0 &&
               !this.isFlipped(cx, cy + 1)
             ) {
-              //right
+              // right
               stack.unshift([cx, cy + 1]);
             } else if (
               cx - 1 >= 0 &&
-              this.getCell(cx - 1, cy).val == 0 &&
+              this.getCell(cx - 1, cy).val === 0 &&
               !this.isFlipped(cx - 1, cy)
             ) {
-              //up
+              // up
               stack.unshift([cx - 1, cy]);
             } else {
               if (this.getCell(cx, cy).val !== -1) {
@@ -165,7 +172,7 @@ export class GameService {
               }
               stack.shift();
             }
-            //check right for num
+            // check right for num
             if (cy + 1 < this.width && this.getCell(cx, cy + 1).val >= 1) {
               this.flipCell(cx, cy + 1);
             }
@@ -215,20 +222,22 @@ export class GameService {
             }
           }
         }
-      } else if (this.getCell(x, y).val == -1) {
-        window.alert("You LOST!");
-        this.gameOver = true;
-        this.showAll();
+      } else if (this.getCell(cell.x, cell.y).val === -1) {
+        this.setGameOver(false);
       } else {
-        this.flipCell(x, y);
+        this.flipCell(cell.x, cell.y);
       }
 
-      if (this.checkUnflipped() == this.bombs) {
-        window.alert("You WIN!");
-        this.gameOver = true;
-        this.showAll();
+      if (this.checkUnflipped() === this.bombs) {
+        this.setGameOver(true);
       }
     }
+  }
+
+  setGameOver(won) {
+    this.gameOver = true;
+    this.showAll();
+    this.gameStatus.emit(won);
   }
 
   showAll() {
@@ -267,6 +276,7 @@ export class GameService {
   getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+    return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
   }
+
 }

@@ -1,9 +1,9 @@
-<div
-  class="container"
-  *ngFor="let i of ' '.repeat(size[0]).split(''); let x = index"
->
-  <span *ngFor="let j of ' '.repeat(size[1]).split(''); let y = index"
-    ><app-cell [x]="x" [y]="y"></app-cell
-  ></span>
-</div>
-<button mat-button (click)="resetGame()">Reset</button>
+<div>
+  <div class="container" *ngFor="let i of board; let x = index;">
+      <span *ngFor="let column of i; let y = index;">
+        <app-cell [x]="x" [y]="y"></app-cell>
+      </span>
+
+  </div>
+  <button mat-button (click)="resetGame()">Reset</button>
+</div>  

@@ -5,6 +5,6 @@
   (click)="clickedCell()"
   (contextmenu)="onRightClick()"
 >
-  <span *ngIf="visited && val !== 0">{{ val }}</span>
-  <span *ngIf="flagged && val !== 0" class="flag">F</span>
+  <span *ngIf="visited">{{ val === 0 ? '' : val }}</span>
+  <span *ngIf="flagged && !visited" class="flag">F</span>
 </div>

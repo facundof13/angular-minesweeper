@@ -1,2 +1,17 @@
 <router-outlet></router-outlet>
-<app-board></app-board>
+<app-board [board]="board"></app-board>
+<app-modal></app-modal>
+
+<form [formGroup]="form">
+    <label for="width">Width
+        <input type="number" id="width" class="form-control" required formControlName="width">
+    </label>
+    <label for="length">Length
+        <input type="number" id="length" class="form-control" required formControlName="length">
+    </label>
+    <label for="mines">Mines
+        <input type="number" id="mines" class="form-control" required formControlName="mines">
+    </label>
+    <button type="submit" (click)="changeSize()">Change Size</button>
+    <button type="submit" (click)="defaultBoard()">Rest to default</button>
+</form>

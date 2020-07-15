@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, EventEmitter, Input, Injector } from "@angular/core";
 import { GameService } from "../game.service";
 
 @Component({
@@ -9,16 +9,24 @@ import { GameService } from "../game.service";
 export class BoardComponent implements OnInit {
   size: Array<number> = [0, 0];
   gameService: GameService;
+  @Input() board: any;
 
-  constructor(gameService: GameService) {
-    this.gameService = new GameService();
-    this.size[0] = gameService.getLength();
-    this.size[1] = gameService.getWidth();
+  constructor(private _injector: Injector) {
+    this.gameService = _injector.get(GameService);
+  }
+  
+  ngOnInit(): void {
+    this.setupGame();
   }
 
   resetGame() {
+    this.board = null;
     this.gameService.resetGame();
   }
 
-  ngOnInit(): void {}
+  setupGame() {
+    this.size[0] = this.gameService.getLength();
+    this.size[1] = this.gameService.getWidth();
+  }
+
 }
